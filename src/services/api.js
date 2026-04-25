@@ -2,7 +2,18 @@
 const BASE = import.meta.env.VITE_API_URL || '';
 
 async function request(path, options = {}) {
+  if (!BASE) {
+    // 🚀 SEM BACKEND → retorna vazio
+    console.warn('API desativada, usando modo offline:', path);
+
+    if (path.includes('fluxograms')) return [];
+    if (path.includes('elements')) return [];
+
+    return {};
+  }
+
   const url = `${BASE}/api${path}`;
+
   const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
@@ -30,22 +41,15 @@ export const patchElement = (id, data) => request(`/elements/${id}`, { method: '
 export const deleteElement = (id) => request(`/elements/${id}`, { method: 'DELETE' });
 
 export async function uploadFile(file) {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const url = `${BASE}/api/upload`;
-  const res = await fetch(url, { method: 'POST', body: formData });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || `Upload failed: HTTP ${res.status}`);
-  }
-
-  return res.json();
+  // 🚀 SEM BACKEND → cria URL local
+  return {
+    url: URL.createObjectURL(file)
+  };
 }
 
 export async function analyzeVision(payload) {
-  return request('/vision/analyze', { method: 'POST', body: JSON.stringify(payload) });
+  console.warn('Vision API desativada (modo local)');
+  return { detections: [] };
 }
 
 export function resolveUrl(url) {
